@@ -1,0 +1,51 @@
+function z = entropy(x)n = numel(x);
+[u,~,x] = unique(x);
+k = numel(u);
+idx = 1:n;
+Mx = sparse(idx,x,1,n,k,n);
+Px = nonzeros(mean(Mx,1));
+Hx = -dot(Px,log2(Px));
+z = max(0,Hx);
+end
+
+
+function z = mutInfo(x, y)
+assert(numel(x) == numel(y));
+n = numel(x);
+x = reshape(x,1,n);
+y = reshape(y,1,n);
+l = min(min(x),min(y));
+x = x-l+1;
+y = y-l+1;
+k = max(max(x),max(y));
+idx = 1:n;
+Mx = sparse(idx,x,1,n,k,n);
+My = sparse(idx,y,1,n,k,n);
+Pxy = nonzeros(Mx'*My/n); %joint distribution of x and y
+Hxy = -dot(Pxy,log2(Pxy));
+Px = nonzeros(mean(Mx,1));
+Py = nonzeros(mean(My,1));
+% entropy of Py and Px
+Hx = -dot(Px,log2(Px));
+Hy = -dot(Py,log2(Py));
+% mutual information
+z = Hx+Hy-Hxy;
+z = max(0,z);
+end
+
+
+k = 10;  % variable range
+n = 100;  % number of variables
+x = ceil(k*rand(1,n));
+y = ceil(k*rand(1,n));
+% x = randi(k,1,n);  % need statistics toolbox
+% y = randi(k,1,n);
+%% Entropy H(x), H(y)
+Hx = entropy(x);
+Hy = entropy(y);
+
+%% Mutual information I(x,y)
+Ixy = mutInfo(x,y);
+
+disp( ‘= = = = =’)
+disp(Ixy)
